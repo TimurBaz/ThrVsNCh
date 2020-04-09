@@ -46,11 +46,12 @@ N=7;
 
 LasArr = Canvas.GetComponentByName('CW Laser Array');
 LasArr.SetParameterValue('Number of output ports',N);
-ch0=3;
-df=0.1;
+ch0=30;
+dCh=1;
+Chs=30:dCh:ch0+dCh*(N-1);
 for k=1:N
     paramName=['Frequency[',num2str(k-1),']'];
-    LasArr.SetParameterValue(paramName,190+ch0+df*k);
+    LasArr.SetParameterValue(paramName,190+Chs(k)/10);
 end
 
 PRBSName='Pseudo-Random Bit Sequence Generator';
@@ -88,6 +89,27 @@ OptFib.GetInputPort(1).Connect(Mux.GetOutputPort(1));
 % b=q.GetInputPort(2);
 % a=LasArr.GetOutputPort(1);
 % a.Connect(b);
+
+
+NCh=4;
+AnCh=Chs(NCh);
+
+OptFilt=Canvas.GetComponentByName('Gaussian Optical Filter');
+OptFilt.SetParameterValue('Frequency',190+AnCh/10);
+
+
+xEye=1000;
+yEye=100;
+EyeName='Eye Diagram Analyzer';
+VisLib='{F11D0C25-3C7D-11D4-93F0-0050DAB7C5D6}';
+LPFiltName='Low Pass Bessel Filter';
+
+EyeOsc=Canvas.CreateComponent(EyeName,VisLib,xEye,yEye, compW, compH,1);
+LPF=Canvas.GetComponentByName(LPFiltName);
+
+PRBSs(NCh).GetOutputPort(1).ConnectVisualizer(EyeOsc.GetInputPort(1));
+NRZGens(NCh).GetOutputPort(1).ConnectVisualizer(EyeOsc.GetInputPort(2));
+LPF.GetOutputPort(1).ConnectVisualizer(EyeOsc.GetInputPort(3));
 
 Canvas.UpdateAll;
 
