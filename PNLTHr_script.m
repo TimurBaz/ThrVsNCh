@@ -42,7 +42,7 @@ yL0=30;
 dx=100;
 dy=200;
 
-N=2;
+N=3;
 
 LasArr = Canvas.GetComponentByName('CW Laser Array');
 LasArr.SetParameterValue('Number of output ports',N);
@@ -81,7 +81,7 @@ end
 
 OptAmpName='Optical Amplifier';
 AmpLib='{255EDC8F-37E4-11D4-93EC-0050DAB7C5D6}';
-OutChannelPower=4;%dBm
+OutChannelPower=10;%dBm
 Layout.AddParameter('OutChP', 2, 'Global', -20, 10,'0', 'dBm','');
 Layout.SetParameterValue('OutChP',OutChannelPower);
 
@@ -109,7 +109,7 @@ OptFib.GetInputPort(1).Connect(Mux.GetOutputPort(1));
 % a.Connect(b);
 
 
-NCh=1;
+NCh=2;
 AnCh=Chs(NCh);
 
 OptFilt=Canvas.GetComponentByName('Gaussian Optical Filter');
@@ -149,25 +149,35 @@ OSNRreqs=zeros(1,NDisp);
 BERs=zeros(1,NDisp);
 BERreq=10^-10;
 
+Pin=2:1:8;
 
-for d =1:NDisp
-    BG.SetParameterValue('Dispersion', Disps(d));
-    [OSNRreqs(d),BERs(d)] = FindOSNRreq(Document,OSNRController,BEROsc,BERreq);
+NameOfCols=string(arrayfun(@(x) sprintf('Pin = %d dBm',x),Pin,'UniformOutput',false));
+data_NCh_fixed = table(Disps.','VariableNames',"Disps");
+
+for p=1:length(Pin)
+    Layout.SetParameterValue('OutChP',Pin(p));
+    for d =1:NDisp
+        BG.SetParameterValue('Dispersion', Disps(d));
+        [OSNRreqs(d),BERs(d)] = FindOSNRreq(Document,OSNRController,BEROsc,BERreq);
+    end
+    data_NCh_fixed = [data_NCh_fixed,table(OSNRreqs.','VariableNames',NameOfCols(p))];
+    save('N_of_Chs=2,Pin4-6','data_NCh_fixed');
 end
 
-[DispCent,DispSpan,DispMax] = CentAndWidthOfDispCurve(Disps,OSNRreqs);
+% [DispCent,DispSpan,DispMax] = CentAndWidthOfDispCurve(Disps,OSNRreqs);
 
 Document.Save(strcat(pwd,'\PNLThr_ForCalc.osd'));
 
 optsys.Quit;
 
 FiberDisp=1800;
-DispCent=DispCent+FiberDisp;
-DispSpan=DispSpan+FiberDisp;
-DispMax=DispMax+FiberDisp;
+% DispCent=DispCent+FiberDisp;
+% DispMax=DispMax+FiberDisp;
 
 save([datestr(now,'mm-dd-yyyy_HH-MM-SS'),'N_of_Chs = ',num2str(N)]);
-figure;
-plot(Disps+FiberDisp,OSNRreqs)
-
 timeOfCals=toc(tStart);
+
+% figure;
+% plot(Disps+FiberDisp,OSNRreqs)
+
+
