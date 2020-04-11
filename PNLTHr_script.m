@@ -140,7 +140,7 @@ OutputOptAmp.SetParameterValue('Operation mode','Power control');
 OutputOptAmp.SetParameterValue('Power',OuputPower);
 
 
-Disps=-3000:500:2000;
+Disps=-3000:100:2000;
 NDisp=length(Disps);
 BGName='Ideal Dispersion Compensation FBG';
 BG=Canvas.GetComponentByName(BGName);
@@ -204,11 +204,11 @@ for p=1:length(Pin)
         [OSNRreqs(d),BERs(d)] = FindOSNRreq(Document,OSNRController,BEROsc,BERreq);
     end
     [CurveParam(k,1),CurveParam(k,2),CurveParam(k,3)]=CentAndWidthOfDispCurve(Disps+FiberDisp,OSNRreqs);
-%     if (p~=1)
-%         if ((abs(CurveParam(1,1)-CurveParam(k,1))>dDispThr)|(abs(CurveParam(1,2)-CurveParam(k,2))>dDispThr))
-%             break;
-%         end
-%     end
+    if (p~=1)
+        if ((abs(CurveParam(1,1)-CurveParam(k,1))>dDispThr)|(abs(CurveParam(1,2)-CurveParam(k,2))>dDispThr))
+            break;
+        end
+    end
     data_NCh_fixed = [data_NCh_fixed,table(OSNRreqs.','VariableNames',NameOfCols(p))];
     save(['N_of_Chs =',num2str(N), ' PinStart = ',num2str(Pin(1))],'data_NCh_fixed');
 end
