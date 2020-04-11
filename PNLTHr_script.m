@@ -36,6 +36,7 @@ Canvas = Layout.GetCurrentCanvas;
 PmMgr = Layout.GetParameterMgr;
 count = Canvas.GetMainCount;
 
+FiberDisp=1800;
 compW=34;
 compH=34;
 xL0=10;
@@ -139,7 +140,7 @@ OutputOptAmp.SetParameterValue('Operation mode','Power control');
 OutputOptAmp.SetParameterValue('Power',OuputPower);
 
 
-Disps=-3000:100:2000;
+Disps=-3000:500:2000;
 NDisp=length(Disps);
 BGName='Ideal Dispersion Compensation FBG';
 BG=Canvas.GetComponentByName(BGName);
@@ -158,18 +159,56 @@ data_NCh_fixed = table(Disps.','VariableNames',"Disps");
 
 dDispThr=200;
 CurveParam=zeros(length(Pin),3);
+Document.Save(strcat(pwd,'\PNLThr_ForCalc.osd'));
+
 for p=1:length(Pin)
+    % create a COM server running OptiSystem
+    optsys.Quit;
+    clear optsys;
+    optsys = actxserver('optisystem.application');
+    
+    % Section looks for OptiSystem process and waits for it to start
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Execute the system command
+    taskToLookFor = 'OptiSystemx64.exe';
+    % Now make up the command line with the proper argument
+    % that will find only the process we are looking for.
+    commandLine = sprintf('tasklist /FI "IMAGENAME eq %s"', taskToLookFor);
+    % Now execute that command line and accept the result into "result".
+    [status, result] = system(commandLine);
+    % Look for our program's name in the result variable.
+    itIsRunning = strfind(lower(result), lower(taskToLookFor));
+    while isempty(itIsRunning)
+        % pause(0.1)
+        [status, result] = system(commandLine);
+        itIsRunning = strfind(lower(result), lower(taskToLookFor));
+    end
+    %%%%%%%%%%%%%%%%%%%%%%%%%
+    directory = strcat(pwd,'\PNLThr_ForCalc.osd');
+    optsys.Open(directory);
+    
+    Document = optsys.GetActiveDocument;
+    LayoutMgr = Document.GetLayoutMgr;
+    Layout = LayoutMgr.GetCurrentLayout;
+    Canvas = Layout.GetCurrentCanvas;
+
+    OSNRController=Canvas.GetComponentByName('Set OSNR');
+    BGName='Ideal Dispersion Compensation FBG';
+    BG=Canvas.GetComponentByName(BGName);
+    BEROsc=Canvas.GetComponentByName(EyeName);
+    
     Layout.SetParameterValue('OutChP',Pin(p));
+    
     for d =1:NDisp
         BG.SetParameterValue('Dispersion', Disps(d));
         [OSNRreqs(d),BERs(d)] = FindOSNRreq(Document,OSNRController,BEROsc,BERreq);
     end
-    [CurveParam(k,1),CurveParam(k,2),CurveParam(k,3)]=CentAndWidthOfDispCurve(t.Disps+FiberDisp,t{:,k+1});
-    if (p~=1)
-        if ((abs(CurveParam(1,1)-CurveParam(k,1))>dDispThr)|(abs(CurveParam(1,2)-CurveParam(k,2))>dDispThr))
-            break;
-        end
-    end
+    [CurveParam(k,1),CurveParam(k,2),CurveParam(k,3)]=CentAndWidthOfDispCurve(Disps+FiberDisp,OSNRreqs);
+%     if (p~=1)
+%         if ((abs(CurveParam(1,1)-CurveParam(k,1))>dDispThr)|(abs(CurveParam(1,2)-CurveParam(k,2))>dDispThr))
+%             break;
+%         end
+%     end
     data_NCh_fixed = [data_NCh_fixed,table(OSNRreqs.','VariableNames',NameOfCols(p))];
     save(['N_of_Chs =',num2str(N), ' PinStart = ',num2str(Pin(1))],'data_NCh_fixed');
 end
@@ -180,7 +219,6 @@ Document.Save(strcat(pwd,'\PNLThr_ForCalc.osd'));
 
 optsys.Quit;
 
-FiberDisp=1800;
 % DispCent=DispCent+FiberDisp;
 % DispMax=DispMax+FiberDisp;
 
