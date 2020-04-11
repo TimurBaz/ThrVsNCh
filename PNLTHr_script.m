@@ -152,7 +152,7 @@ OSNRreqs=zeros(1,NDisp);
 BERs=zeros(1,NDisp);
 BERreq=10^-10;
 
-Pin=[1,5:8];
+Pin=[1:10];
 
 NameOfCols=string(arrayfun(@(x) sprintf('Pin = %d dBm',x),Pin,'UniformOutput',false));
 data_NCh_fixed = table(Disps.','VariableNames',"Disps");
@@ -203,14 +203,14 @@ for p=1:length(Pin)
         BG.SetParameterValue('Dispersion', Disps(d));
         [OSNRreqs(d),BERs(d)] = FindOSNRreq(Document,OSNRController,BEROsc,BERreq);
     end
-    [CurveParam(k,1),CurveParam(k,2),CurveParam(k,3)]=CentAndWidthOfDispCurve(Disps+FiberDisp,OSNRreqs);
+    [CurveParam(p,1),CurveParam(p,2),CurveParam(p,3)]=CentAndWidthOfDispCurve(Disps+FiberDisp,OSNRreqs);
+    data_NCh_fixed = [data_NCh_fixed,table(OSNRreqs.','VariableNames',NameOfCols(p))];
+    save(['N_of_Chs =',num2str(N), ' PinStart = ',num2str(Pin(1))],'data_NCh_fixed');
     if (p~=1)
-        if ((abs(CurveParam(1,1)-CurveParam(k,1))>dDispThr)|(abs(CurveParam(1,2)-CurveParam(k,2))>dDispThr))
+        if ((abs(CurveParam(1,1)-CurveParam(p,1))>dDispThr)|(abs(CurveParam(1,2)-CurveParam(p,2))>dDispThr))
             break;
         end
     end
-    data_NCh_fixed = [data_NCh_fixed,table(OSNRreqs.','VariableNames',NameOfCols(p))];
-    save(['N_of_Chs =',num2str(N), ' PinStart = ',num2str(Pin(1))],'data_NCh_fixed');
 end
 
 % [DispCent,DispSpan,DispMax] = CentAndWidthOfDispCurve(Disps,OSNRreqs);
