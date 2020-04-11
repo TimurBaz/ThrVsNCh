@@ -4,6 +4,7 @@ clearvars;
 close all;
 tStart=tic;
 
+
 % create a COM server running OptiSystem
 optsys = actxserver('optisystem.application');
 
@@ -42,7 +43,8 @@ yL0=30;
 dx=100;
 dy=200;
 
-N=3;
+halfN=1;
+N=halfN*2+1;
 
 LasArr = Canvas.GetComponentByName('CW Laser Array');
 LasArr.SetParameterValue('Number of output ports',N);
@@ -109,7 +111,7 @@ OptFib.GetInputPort(1).Connect(Mux.GetOutputPort(1));
 % a.Connect(b);
 
 
-NCh=2;
+NCh=halfN+1;
 AnCh=Chs(NCh);
 
 OptFilt=Canvas.GetComponentByName('Gaussian Optical Filter');
@@ -149,19 +151,27 @@ OSNRreqs=zeros(1,NDisp);
 BERs=zeros(1,NDisp);
 BERreq=10^-10;
 
-Pin=2:1:8;
+Pin=[1,5:8];
 
 NameOfCols=string(arrayfun(@(x) sprintf('Pin = %d dBm',x),Pin,'UniformOutput',false));
 data_NCh_fixed = table(Disps.','VariableNames',"Disps");
 
+dDispThr=200;
+CurveParam=zeros(length(Pin),3);
 for p=1:length(Pin)
     Layout.SetParameterValue('OutChP',Pin(p));
     for d =1:NDisp
         BG.SetParameterValue('Dispersion', Disps(d));
         [OSNRreqs(d),BERs(d)] = FindOSNRreq(Document,OSNRController,BEROsc,BERreq);
     end
+    [CurveParam(k,1),CurveParam(k,2),CurveParam(k,3)]=CentAndWidthOfDispCurve(t.Disps+FiberDisp,t{:,k+1});
+    if (p~=1)
+        if ((abs(CurveParam(1,1)-CurveParam(k,1))>dDispThr)|(abs(CurveParam(1,2)-CurveParam(k,2))>dDispThr))
+            break;
+        end
+    end
     data_NCh_fixed = [data_NCh_fixed,table(OSNRreqs.','VariableNames',NameOfCols(p))];
-    save('N_of_Chs=2,Pin4-6','data_NCh_fixed');
+    save(['N_of_Chs =',num2str(N), ' PinStart = ',num2str(Pin(1))],'data_NCh_fixed');
 end
 
 % [DispCent,DispSpan,DispMax] = CentAndWidthOfDispCurve(Disps,OSNRreqs);
