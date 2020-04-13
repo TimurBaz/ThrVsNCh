@@ -18,7 +18,7 @@ PmMgr = Layout.GetParameterMgr;
 %physical settings
 FiberDisp=1800;%dispersion of fiber 18[ps/nm/km]*100[km]
 
-halfN=3;%number of channel on one side of the center
+halfN=2;%number of channel on one side of the center
 N=halfN*2+1;%total number of channels
 ch0=30;%start channel
 dCh=1;%distance between consecutive channels
@@ -31,12 +31,12 @@ Chirp0=-0.65;%alpha parameter of input chirp
 m0=0.85;%modulation index of input radiation
 OuputPower=-10;%total optical power after output amplifier
 
-Disps=-3000:500:2000;%array with investigating dispersion points
+Disps=-3000:100:2000;%array with investigating dispersion points
 NDisp=length(Disps);%number of dispersion points
 BERreq=10^-10;%value of req BER
 dDispThr=200;%threshold for dispersion curve variations
 
-Pin=[-6:-5];%array with param of channels power after input amplifier
+Pin=[-6:10];%array with param of channels power after input amplifier
  
 %drawing settings
 compW=34;%width of a Component
@@ -141,6 +141,8 @@ CurveParam=zeros(length(Pin),3);%array for dispersion curve params...
 %cycle with main calculations
 totalInputPower = Pin + 10 * log10(N);
 
+folderName=[datestr(now,'mm-dd-yyyy_HH-MM-SS'),'_N_of_Chs =',num2str(N)];
+mkdir(folderName);
 for p=1:length(Pin)
     optsys.Quit;
     clear optsys;
@@ -162,17 +164,21 @@ for p=1:length(Pin)
     %10*log10(PowerOfOneChannel*N)=10*log10(PowerOfOneChannel)+10*log10(N)=Pin+10*log10(N)
     InAmp.SetParameterValue('Power', totalInputPower(p));%set total input power
     
+    cd(folderName);
+    curFolderName=['Pin = ',num2str(Pin(p)),' dBm'];
+    mkdir(curFolderName);
+    cd('..');
     %one dispersion curve calcalations
     for d =1:NDisp
         BG.SetParameterValue('Dispersion', Disps(d));
         [OSNRreqs(d),BERs(d)] = FindOSNRreq(Document,OSNRController,BEROsc,BERreq);
         [x,y]=export_data(eyeDiagram,1);
-        save([datestr(now,'mm-dd-yyyy_HH-MM-SS'),'N_of_Chs =',num2str(N), ' Pin = ', num2str(Pin(p)),'_Dispersion = ',num2str(Disps(d))],'x','y')
+        save([folderName,'\',curFolderName,'\','N_of_Chs =',num2str(N), ' Pin = ', num2str(Pin(p)),'_Dispersion = ',num2str(Disps(d))],'x','y')
     end
     [CurveParam(p,1),CurveParam(p,2),CurveParam(p,3)]=CentAndWidthOfDispCurve(Disps+FiberDisp,OSNRreqs);
     data_NCh_fixed = [data_NCh_fixed,table(OSNRreqs.','VariableNames',NameOfCols(p))];
-    save(['N_of_Chs =',num2str(N), ' PinStart = ',num2str(Pin(1))],'data_NCh_fixed');%backup
-    
+    %save(['N_of_Chs =',num2str(N), ' PinStart =
+    %',num2str(Pin(1))],'data_NCh_fixed');%backup
     %checking nonlinear thr
     if (p~=1)
         if ((abs(CurveParam(1,1)-CurveParam(p,1))>dDispThr)|(abs(CurveParam(1,2)-CurveParam(p,2))>dDispThr))
