@@ -44,7 +44,7 @@ yL0=30;
 dx=100;
 dy=200;
 
-halfN=1;
+halfN=3;
 N=halfN*2+1;
 
 LasArr = Canvas.GetComponentByName('CW Laser Array');
@@ -152,7 +152,7 @@ OSNRreqs=zeros(1,NDisp);
 BERs=zeros(1,NDisp);
 BERreq=10^-10;
 
-Pin=[1:10];
+Pin=[-6:10];
 
 NameOfCols=string(arrayfun(@(x) sprintf('Pin = %d dBm',x),Pin,'UniformOutput',false));
 data_NCh_fixed = table(Disps.','VariableNames',"Disps");
