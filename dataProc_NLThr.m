@@ -3,6 +3,11 @@ close all;
 
 Lsize=3;
 fSize=14;
+
+labelOpt={'Interpreter','latex','FontSize', fSize, 'Color', 'black', 'FontWeight', 'bold'};
+
+opt.Linewidth=Lsize;
+
 FiberDisp=1800;
 DispLeft=-1500;
 DispRight=2500;
@@ -13,9 +18,10 @@ q=q(4:end);
 picFolder=[ResultsFolder,'_pic'];
 mkdir(picFolder);
 
+
 for w=1:length(q)
     nameOfCurFile=q(w).name;
-    load([pwd,'/',ResultsFolder,'/',nameOfCurFile],'data_NCh_fixed','N');
+    load([pwd,'/',ResultsFolder,'/',nameOfCurFile],'data_NCh_fixed','N','dCh');
     nC=size(data_NCh_fixed,2)-1;
 
     CurveParam=zeros(nC,3);
@@ -38,24 +44,25 @@ for w=1:length(q)
     end
 
     legend(names,'FontSize',fSize,'Interpreter','latex');
-    xlabel('Resudial dispersion, ps/nm','Interpreter','latex','FontSize', fSize, 'Color', 'black', 'FontWeight', 'bold');
-    ylabel('OSNR$_{\textrm{req}}$, dB','Interpreter','latex','FontSize', fSize, 'Color', 'black', 'FontWeight', 'bold');
+    xlabel('Resudial dispersion, ps/nm',labelOpt{:});
+    ylabel('OSNR$_{\textrm{req}}$, dB',labelOpt{:});
     set(gca,'FontSize', fSize,'FontName','Times New Roman');
     xlim([DispLeft,DispRight]);
     hold off;
 
     subplot(1,2,2);
     set(gca,'FontSize', fSize,'FontName','Times New Roman');
-    xlabel('P$_{\textrm{in}}$, dBm','Interpreter','latex','FontSize', fSize, 'Color', 'black', 'FontWeight', 'bold');
+    xlabel('P$_{\textrm{in}}$, dBm',labelOpt{:});
     yyaxis left;
-    plot(PinVal,CurveParam(:,1),'Linewidth',Lsize);
-    ylabel('Curve Center, ps/nm','Interpreter','latex','FontSize', fSize, 'Color', 'black', 'FontWeight', 'bold');
+    plot(PinVal,CurveParam(:,1),opt);
+    ylabel('Curve Center, ps/nm',labelOpt{:});
 
     yyaxis right;
-    plot(PinVal,CurveParam(:,2),'Linewidth',Lsize);
-    ylabel('Curve Width, ps/nm','Interpreter','latex','FontSize', fSize, 'Color', 'black', 'FontWeight', 'bold');
+    plot(PinVal,CurveParam(:,2),opt);
+    ylabel('Curve Width, ps/nm',labelOpt{:});
 
-    sgtitle(['Total number of channels = ',num2str(N)],'Interpreter','latex','FontSize', fSize);
+    CurGraphTitle=sprintf('Total number of channels = %d; Grid spacing = %d GHz',N,dCh*100);
+    sgtitle(CurGraphTitle,'Interpreter','latex','FontSize', fSize);
 %     hgexport(f,nameOfCurFile(1:end-4));
     print('-painters','-dpdf','-fillpage',[picFolder,'/',nameOfCurFile(1:end-4)]);
     close(gcf);
