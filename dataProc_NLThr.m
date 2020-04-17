@@ -45,8 +45,6 @@ for w=1:length(q)
     hold off;
 
     subplot(1,2,2);
-    grid on;
-    grid minor;
     set(gca,'FontSize', fSize,'FontName','Times New Roman');
     xlabel('P$_{\textrm{in}}$, dBm','Interpreter','latex','FontSize', fSize, 'Color', 'black', 'FontWeight', 'bold');
     yyaxis left;
