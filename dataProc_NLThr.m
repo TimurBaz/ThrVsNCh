@@ -64,7 +64,7 @@ for w=1:length(q)
     CurGraphTitle=sprintf('Total number of channels = %d; Grid spacing = %d GHz',N,dCh*100);
     sgtitle(CurGraphTitle,'Interpreter','latex','FontSize', fSize);
 %     hgexport(f,nameOfCurFile(1:end-4));
-    print('-painters','-dpdf','-fillpage',[picFolder,'/',nameOfCurFile(1:end-4)]);
+%     print('-painters','-dpdf','-fillpage',[picFolder,'/',nameOfCurFile(1:end-4)]);
     close(gcf);
     % CurveParam(:,1)=CurveParam(:,3)-CurveParam(:,2)/2;
 end
