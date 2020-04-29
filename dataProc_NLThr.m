@@ -12,7 +12,7 @@ FiberDisp=1800;
 DispLeft=-1500;
 DispRight=2500;
 
-ResultsFolder='results_week_1';
+ResultsFolder='results_week_2';
 q=dir(ResultsFolder);
 q=q(4:end);
 picFolder=[ResultsFolder,'_pic'];
@@ -44,8 +44,8 @@ for w=1:length(q)
     end
 
     legend(names,'FontSize',fSize,'Interpreter','latex');
-    xlabel('Resudial dispersion, ps/nm',labelOpt{:});
-    ylabel('OSNR$_{\textrm{req}}$, dB',labelOpt{:});
+    xlabel('Residual dispersion, ps/nm',labelOpt{:});
+    ylabel('OSNR$_{\textrm{req}}$ at $10^{-10}$ BER, dB',labelOpt{:});
     set(gca,'FontSize', fSize,'FontName','Times New Roman');
     xlim([DispLeft,DispRight]);
     hold off;
@@ -64,7 +64,7 @@ for w=1:length(q)
     CurGraphTitle=sprintf('Total number of channels = %d; Grid spacing = %d GHz',N,dCh*100);
     sgtitle(CurGraphTitle,'Interpreter','latex','FontSize', fSize);
 %     hgexport(f,nameOfCurFile(1:end-4));
-%     print('-painters','-dpdf','-fillpage',[picFolder,'/',nameOfCurFile(1:end-4)]);
+    print('-painters','-dpdf','-fillpage',[picFolder,'/',nameOfCurFile(1:end-4)]);
     close(gcf);
     % CurveParam(:,1)=CurveParam(:,3)-CurveParam(:,2)/2;
 end

@@ -1,6 +1,6 @@
 function optsys = OpenOptisystem(directory)
     % create a COM server running OptiSystem
-    optsys = actxserver('optisystem.application');
+    optsys = actxserver('OptiSystem.Application');
 
     % Section looks for OptiSystem process and waits for it to start
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%

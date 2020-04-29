@@ -2,8 +2,8 @@ clc;clear;close all;
 
 Lsize=3;
 fSize=30;
-Ns=3:2:19;
-NLThr=[0,-3,-4,-5,-6,-5,-6,-7,-8];
+Ns=3:2:35;
+NLThr=[3,0,-1,-3,-3,-4,-5,-5,-6,-8,-7,-8,-7,-8,-7,-8,-8];
 
 opt.Linewidth=Lsize;
 opt.Marker='o';

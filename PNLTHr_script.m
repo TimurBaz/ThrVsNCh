@@ -7,6 +7,7 @@ tStart=tic;
 %Open start file, where the scheme will be drawn
 directory = strcat(pwd,'\PNLThr.osd');
 optsys=OpenOptisystem(directory);
+Npars=1;
 
 %Get main system variables
 Document = optsys.GetActiveDocument;
@@ -18,7 +19,7 @@ PmMgr = Layout.GetParameterMgr;
 %physical settings
 FiberDisp=1800;%dispersion of fiber 18[ps/nm/km]*100[km]
 
-halfN=5;%number of channel on one side of the center
+halfN=25;%number of channel on one side of the center
 N=halfN*2+1;%total number of channels
 ch0=30;%start channel
 dCh=1;%distance between consecutive channels
@@ -36,7 +37,13 @@ NDisp=length(Disps);%number of dispersion points
 BERreq=10^-10;%value of req BER
 dDispThr=200;%threshold for dispersion curve variations
 
-Pin=[-6:-3];%array with param of channels power after input amplifier
+Pin=[-11];%array with param of channels power after input amplifier
+    if (mod(length(Pin),Npars)==0) 
+        Pin=reshape(Pin,Npars,length(Pin)/Npars);
+    else
+        error='size of Pin is not agreed with Npars'
+        return;
+    end
  
 %drawing settings
 compW=34;%width of a Component
@@ -126,14 +133,23 @@ NRZGens(NCh).GetOutputPort(1).ConnectVisualizer(BEROsc.GetInputPort(2));
 LPF.GetOutputPort(1).ConnectVisualizer(BEROsc.GetInputPort(3));
 
 Canvas.UpdateAll;%draw all created components and connections
-Document.Save(strcat(pwd,'\PNLThr_ForCalc.osd'));% save document for current calculations in another file 
+nameOfOptsyss=string(1:Npars);
+for k=1:Npars
+    nameOfOptsyss(k)=strcat("\PNLThr_ForCalc_",num2str(k),".osd");
+    Document.Save(strcat(pwd,convertStringsToChars(nameOfOptsyss(k))));% save document for calculations in the other files
+end
+optsys.Quit;
+clear optsys;
 
 OSNRreqs=zeros(1,NDisp);%temp variable with OSNR
 BERs=zeros(1,NDisp);%temp variable with BER
 
 %create table for results of calcs
 NameOfCols=string(arrayfun(@(x) sprintf('Pin = %d dBm',x),Pin,'UniformOutput',false));
-data_NCh_fixed = table(Disps.','VariableNames',"Disps");
+NameOfCols=reshape(NameOfCols,1,length(Pin(:)));
+NameOfCols=["Disps",NameOfCols];
+data_NCh_fixed = array2table(zeros(length(Disps),length(NameOfCols)),'VariableNames',NameOfCols);
+data_NCh_fixed.Disps=Disps.';
 
 CurveParam=zeros(length(Pin),3);%array for dispersion curve params...
 %first column - center, second - span, third - max dispersion
@@ -143,53 +159,29 @@ totalInputPower = Pin + 10 * log10(N);
 
 folderName=[datestr(now,'mm-dd-yyyy_HH-MM-SS'),'_N_of_Chs =',num2str(N)];
 mkdir(folderName);
-for p=1:length(Pin)
-    optsys.Quit;
-    clear optsys;
-    directory = strcat(pwd,'\PNLThr_ForCalc.osd');
-    optsys=OpenOptisystem(directory);
-    
-    Document = optsys.GetActiveDocument;
-    LayoutMgr = Document.GetLayoutMgr;
-    Layout = LayoutMgr.GetCurrentLayout;
-    Canvas = Layout.GetCurrentCanvas;
+OSNRContName='Set OSNR';
+BGName='Ideal Dispersion Compensation FBG';
+InAmpName='Optical Amplifier_1';
 
-    OSNRController=Canvas.GetComponentByName('Set OSNR');
-    InAmp=Canvas.GetComponentByName('Optical Amplifier_1');
-    BG=Canvas.GetComponentByName('Ideal Dispersion Compensation FBG');
-    BEROsc=Canvas.GetComponentByName(EyeName);
-    eyeDiagram=BEROsc.GetGraph("Eye Diagram");
-    
-    %total input power in dBm =
-    %10*log10(PowerOfOneChannel*N)=10*log10(PowerOfOneChannel)+10*log10(N)=Pin+10*log10(N)
-    InAmp.SetParameterValue('Power', totalInputPower(p));%set total input power
-    
-    cd(folderName);
-    curFolderName=['Pin = ',num2str(Pin(p)),' dBm'];
-    mkdir(curFolderName);
-    cd('..');
-    %one dispersion curve calcalations
-    for d =1:NDisp
-        BG.SetParameterValue('Dispersion', Disps(d));
-        OSNRreqs(d) = FindOSNRreq_v2(Document,Layout,OSNRController,BEROsc,BERreq);
-        [x,y]=export_data(eyeDiagram,1);
-        save([folderName,'\',curFolderName,'\','N_of_Chs =',num2str(N), ' Pin = ', num2str(Pin(p)),'_Dispersion = ',num2str(Disps(d))],'x','y')
+Nc=size(Pin,2);
+ParStep=10;
+
+OSNRreq=zeros(NDisp,Npars);
+tempTable=zeros(Npars,NDisp,Nc);
+
+for p=1:Npars
+    tempT=zeros(NDisp,Nc);
+    for ind=1:Nc
+        tempT(:,ind)=dispCurveCalc(ParStep,BERreq,strcat(pwd,nameOfOptsyss(p)),OSNRContName,...
+            BGName,EyeName,InAmpName,totalInputPower(p,ind),Disps,...
+            [folderName,'\','Pin = ',num2str(Pin(p,ind)),' dBm']);
     end
-    [CurveParam(p,1),CurveParam(p,2),CurveParam(p,3)]=CentAndWidthOfDispCurve(Disps+FiberDisp,OSNRreqs);
-    data_NCh_fixed = [data_NCh_fixed,table(OSNRreqs.','VariableNames',NameOfCols(p))];
-%     save(['N_of_Chs =',num2str(N), ' PinStart =',num2str(Pin(1))],'data_NCh_fixed');%backup
-    %checking nonlinear thr
-    if (p~=1)
-        if ((abs(CurveParam(1,1)-CurveParam(p,1))>dDispThr)|(abs(CurveParam(1,2)-CurveParam(p,2))>dDispThr))
-            break;
-        end
-    end
-    
+    tempTable(p,:,:)=tempT;
 end
 
-Document.Save(strcat(pwd,'\PNLThr_ForCalc.osd'));
-
-optsys.Quit;
+for p=1:Npars
+    data_NCh_fixed{:,Nc*(p-1)+2:Nc*p+1}=reshape(tempTable(p,:,:),NDisp,Nc);
+end
 
 save([datestr(now,'mm-dd-yyyy_HH-MM-SS'),'N_of_Chs = ',num2str(N)]);
 timeOfCals=toc(tStart);
