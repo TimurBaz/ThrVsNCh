@@ -7,7 +7,7 @@ tStart=tic;
 %Open start file, where the scheme will be drawn
 directory = strcat(pwd,'\PNLThr.osd');
 optsys=OpenOptisystem(directory);
-Npars=1;
+Npars=1;%always 1, because parallel calculations weren't implemented
 
 %Get main system variables
 Document = optsys.GetActiveDocument;
@@ -18,8 +18,9 @@ PmMgr = Layout.GetParameterMgr;
 
 %physical settings
 FiberDisp=1800;%dispersion of fiber 18[ps/nm/km]*100[km]
+maxNLph=12.5;%max NL phase per step [mrad]
 
-halfN=25;%number of channel on one side of the center
+halfN=4;%number of channel on one side of the center
 N=halfN*2+1;%total number of channels
 ch0=30;%start channel
 dCh=1;%distance between consecutive channels
@@ -37,7 +38,7 @@ NDisp=length(Disps);%number of dispersion points
 BERreq=10^-10;%value of req BER
 dDispThr=200;%threshold for dispersion curve variations
 
-Pin=[-11];%array with param of channels power after input amplifier
+Pin=[0,1];%array with param of channels power after input amplifier
     if (mod(length(Pin),Npars)==0) 
         Pin=reshape(Pin,Npars,length(Pin)/Npars);
     else
@@ -106,6 +107,10 @@ end
 InAmp=Canvas.GetComponentByName('Optical Amplifier_1');
 InAmp.GetInputPort(1).Connect(Mux.GetOutputPort(1));
 
+optFiberLib='{416EC6F1-529F-11D4-9403-0050DAB7C5D6}';
+optFiber=Canvas.GetComponentByName('Optical Fiber');
+optFiber.SetParameterValue('Max. nonlinear phase shift',maxNLph);
+
 OSNRController=Canvas.GetComponentByName('Set OSNR');
 OSNRController.SetParameterValue('Signal Frequency',ch2Hz(AnCh));
 
@@ -164,7 +169,7 @@ BGName='Ideal Dispersion Compensation FBG';
 InAmpName='Optical Amplifier_1';
 
 Nc=size(Pin,2);
-ParStep=10;
+ParStep=10;%amount of points of disp curve before reopening Optisystem
 
 OSNRreq=zeros(NDisp,Npars);
 tempTable=zeros(Npars,NDisp,Nc);
@@ -183,7 +188,8 @@ for p=1:Npars
     data_NCh_fixed{:,Nc*(p-1)+2:Nc*p+1}=reshape(tempTable(p,:,:),NDisp,Nc);
 end
 
+timeOfCals=toc(tStart);% time of calculations
 save([datestr(now,'mm-dd-yyyy_HH-MM-SS'),'N_of_Chs = ',num2str(N)]);
-timeOfCals=toc(tStart);
+
 
 
