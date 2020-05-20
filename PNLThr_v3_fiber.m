@@ -46,7 +46,7 @@ NDisp=length(Disps);%number of dispersion points
 BERreq=10^-10;%value of req BER
 dDispThr=200;%threshold for dispersion curve variations
 
-Pin=[0,1];%array with param of channels power after input amplifier
+Pin=[0:1];%array with param of channels power after input amplifier
     if (mod(length(Pin),Npars)==0) 
         Pin=reshape(Pin,Npars,length(Pin)/Npars);
     else
@@ -117,67 +117,22 @@ InAmp.GetInputPort(1).Connect(Mux.GetOutputPort(1));
 optFiber=Canvas.GetComponentByName('Optical Fiber CWDM');
 optFiber.SetParameterValue('Max. nonlinear phase shift',maxNLph);
 
-
 NPin=length(Pin);
 Layout.SetTotalSweepIterations(NPin);
+InAmp.SetParameterMode('Power',2);%Set iterated mode
 for k=1:NPin
-    InAmp.SetSweepParameterValue('Power',k,Pin(k));
+    totalPower=Pin(k)+10*log10(N);
+    InAmp.SetSweepParameterValue('Power',k,totalPower);
 end
 
 Document.Save(strcat(pwd,'\PNLThr_ForCalc_Fiber.osd'));
 Canvas.UpdateAll;%draw all created components and connections
 optsys.ActivateApplication();
 
+SaveFileComp=Canvas.GetComponentByName('Save to file');
+fileName=[datestr(now,'mm-dd-yyyy_HH_MM_SS'),sprintf('_N_of_Chs=%d_Pin=%d-%d.ods',N,min(Pin),max(Pin))];
+SaveFileComp.SetParameterValue('Filename',fileName);
+
+Document.CalculateProject(true,true);
 optsys.Quit;
 clear optsys;
-
-% 
-% SaveFileComp=Canvas.GetComponentByName('Save to file');
-% fileName=[datestr(now,'mm-dd-yyyy_HH-MM-SS'),sprintf('_N_of_Chs=%d_Pin=%d:%d.ods',N,min(Pin),max(Pin))];
-% SaveFileComp.SetParameterValue('Filename',fileName);
-% for m=1:NOSNRs
-%     OSNRController.SetParameterValue('Set OSNR',OSNRs(m));
-%     Document.CalculateProject( true , true);
-%     for k=1:NDisps
-%         data_BER(k,m)=EyeOsc(k).GetResultValue('Min. BER');
-%     end
-% end
-% 
-% Document.Save(strcat(pwd,'\Res\PNLThr_ForCalc.osd'));
-% optsys.Quit;
-% clear optsys;
-% timeOfCals=toc(tStart);% time of calculations
-% save([datestr(now,'mm-dd-yyyy_HH-MM-SS'),'N_of_Chs = ',num2str(N)]);
-
-% BG=Canvas.GetComponentByName('Ideal Dispersion Compensation FBG');
-% BG.SetParameterValue('Frequency',ch2Hz(AnCh));
-% BG.SetParameterValue('Bandwidth',100*(N+2));
-% 
-% OptFilt=Canvas.GetComponentByName('Gaussian Optical Filter');
-% OptFilt.SetParameterValue('Frequency',ch2Hz(AnCh));
-% 
-% OutputOptAmp=Canvas.GetComponentByName('Optical Amplifier');
-% OutputOptAmp.SetParameterValue('Operation mode','Power control');
-% OutputOptAmp.SetParameterValue('Power',OuputPower);
-% 
-% %creating and customizing BERAnalyzer
-% EyeName='BER Analyzer';
-% VisLib='{F11D0C25-3C7D-11D4-93F0-0050DAB7C5D6}';
-% LPFiltName='Low Pass Bessel Filter';
-% 
-% BEROsc=Canvas.CreateComponent(EyeName,VisLib,xEye,yEye, compW, compH,1);
-% LPF=Canvas.GetComponentByName(LPFiltName);
-
-% PRBSs(NCh).GetOutputPort(1).ConnectVisualizer(BEROsc.GetInputPort(1));
-% NRZGens(NCh).GetOutputPort(1).ConnectVisualizer(BEROsc.GetInputPort(2));
-% LPF.GetOutputPort(1).ConnectVisualizer(BEROsc.GetInputPort(3));
-% 
-% Canvas.UpdateAll;%draw all created components and connections
-% nameOfOptsyss=string(1:Npars);
-% for k=1:Npars
-%     nameOfOptsyss(k)=strcat("\PNLThr_ForCalc_",num2str(k),".osd");
-%     Document.Save(strcat(pwd,convertStringsToChars(nameOfOptsyss(k))));% save document for calculations in the other files
-% end
-% optsys.Quit;
-% clear optsys;
-
