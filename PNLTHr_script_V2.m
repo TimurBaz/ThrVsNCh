@@ -167,9 +167,25 @@ for k=1:NDisps
 end
 
 Canvas.UpdateAll;%draw all created components and connections
-Document.Save(strcat(pwd,'\PNLThr_dr.osd'));
+Document.Save(strcat(pwd,'\PNLThr_ForCalc.osd'));
+
+OSNRs=15:50;
+NOSNRs=length(OSNRs);
+data_BER=zeros(NDisps,length(OSNRs));
+
+for m=1:NOSNRs
+    OSNRController.SetParameterValue('Set OSNR',OSNRs(m));
+    Document.CalculateProject( true , true);
+    for k=1:NDisps
+        data_BER(k,m)=BEROsc.GetResultValue('Min. BER');
+    end
+end
+
+Document.Save(strcat(pwd,'\PNLThr_ForCalc.osd'));
 optsys.Quit;
 clear optsys;
+timeOfCals=toc(tStart);% time of calculations
+save([datestr(now,'mm-dd-yyyy_HH-MM-SS'),'N_of_Chs = ',num2str(N)]);
 
 % BG=Canvas.GetComponentByName('Ideal Dispersion Compensation FBG');
 % BG.SetParameterValue('Frequency',ch2Hz(AnCh));
