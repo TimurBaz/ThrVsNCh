@@ -21,7 +21,7 @@ PmMgr = Layout.GetParameterMgr;
 FiberDisp=1800;%dispersion of fiber 18[ps/nm/km]*100[km]
 maxNLph=12.5;%max NL phase per step [mrad]
 
-halfN=4;%number of channel on one side of the center
+halfN=1;%number of channel on one side of the center
 N=halfN*2+1;%total number of channels
 ch0=30;%start channel
 dCh=1;%distance between consecutive channels
@@ -112,6 +112,7 @@ end
 %connecting mux with input amplifier
 InAmp=Canvas.GetComponentByName('Optical Amplifier');
 InAmp.GetInputPort(1).Connect(Mux.GetOutputPort(1));
+InAmp.SetParameterValue('Power', 0+10*log10(N));%set total input power
 
 optFiber=Canvas.GetComponentByName('Optical Fiber CWDM');
 optFiber.SetParameterValue('Max. nonlinear phase shift',maxNLph);
@@ -160,7 +161,8 @@ for k=1:NDisps
     BG(k).GetOutputPort(2).Connect(OptFilt(k).GetInputPort(1));
     OptFilt(k).GetOutputPort(1).Connect(OptAmp(k).GetInputPort(1));
     OptAmp(k).GetOutputPort(1).Connect(APD(k).GetInputPort(1));
-    APD(k).GetOutputPort(1).Connect(Reg(k).GetInputPort(1));
+    APD(k).GetOutputPort(1).Connect(LPF(k).GetInputPort(1));
+    LPF(k).GetOutputPort(1).Connect(Reg(k).GetInputPort(1));
     Reg(k).GetOutputPort(1).ConnectVisualizer(EyeOsc(k).GetInputPort(1));
     Reg(k).GetOutputPort(2).ConnectVisualizer(EyeOsc(k).GetInputPort(2));
     Reg(k).GetOutputPort(3).ConnectVisualizer(EyeOsc(k).GetInputPort(3));
@@ -168,8 +170,9 @@ end
 
 Canvas.UpdateAll;%draw all created components and connections
 Document.Save(strcat(pwd,'\PNLThr_ForCalc.osd'));
+optsys.ActivateApplication();
 
-OSNRs=15:50;
+OSNRs=15:1:50;
 NOSNRs=length(OSNRs);
 data_BER=zeros(NDisps,length(OSNRs));
 
@@ -177,11 +180,11 @@ for m=1:NOSNRs
     OSNRController.SetParameterValue('Set OSNR',OSNRs(m));
     Document.CalculateProject( true , true);
     for k=1:NDisps
-        data_BER(k,m)=BEROsc.GetResultValue('Min. BER');
+        data_BER(k,m)=EyeOsc(k).GetResultValue('Min. BER');
     end
 end
 
-Document.Save(strcat(pwd,'\PNLThr_ForCalc.osd'));
+Document.Save(strcat(pwd,'\Res\PNLThr_ForCalc.osd'));
 optsys.Quit;
 clear optsys;
 timeOfCals=toc(tStart);% time of calculations
