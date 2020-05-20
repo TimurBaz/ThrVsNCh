@@ -38,8 +38,10 @@ APDGain=10;
 APDResp=0.85;
 APDIon=0.9;
 NF=0;
+FiltBand=50;
 
 Disps=-3000:100:2000;%array with investigating dispersion points
+NDisps=length(Disps);
 NDisp=length(Disps);%number of dispersion points
 BERreq=10^-10;%value of req BER
 dDispThr=200;%threshold for dispersion curve variations
@@ -118,7 +120,7 @@ OSNRController=Canvas.GetComponentByName('Set OSNR');
 OSNRController.SetParameterValue('Signal Frequency',ch2Hz(AnCh));
 
 NFork=Canvas.GetComponentByName('Fork 1xN');
-NFork.SetParameterValue('Number of output ports',N);
+NFork.SetParameterValue('Number of output ports',NDisps);
 
 bgName='Ideal Dispersion Compensation FBG';
 optFiltName='Gaussian Optical Filter';
@@ -128,7 +130,9 @@ LPFName='Low Pass Bessel Filter';
 RegName='3R Regenerator';
 EyeName='BER Analyzer';
 numCol=10;
-for k=1:N
+
+%draw receivers
+for k=1:NDisps
     BG(k)=Canvas.CreateComponent(bgName,DispCompLib,xL0+numCol*dx,yL0+dy*(k-1), compW, compH,1);
     OptFilt(k)=Canvas.CreateComponent(optFiltName,FiltLib,xL0+(numCol+1)*dx,yL0+dy*(k-1), compW, compH,1);
     OptAmp(k)=Canvas.CreateComponent(optAmpName,AmpLib,xL0+(numCol+2)*dx,yL0+dy*(k-1), compW, compH,1);
@@ -140,7 +144,9 @@ for k=1:N
     %customizing recievers
     BG(k).SetParameterValue('Frequency',ch2Hz(AnCh));
     BG(k).SetParameterValue('Bandwidth',100*(N+2));
+    BG(k).SetParameterValue('Dispersion',Disps(k));
     OptFilt(k).SetParameterValue('Frequency',ch2Hz(AnCh));
+    OptFilt(k).SetParameterValue('Bandwidth',FiltBand);
     APD(k).SetParameterValue('Gain',APDGain);
     APD(k).SetParameterValue('Responsivity',APDResp);
     APD(k).SetParameterValue('Ionization ratio',APDIon);
