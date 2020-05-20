@@ -114,28 +114,29 @@ optFiber.SetParameterValue('Max. nonlinear phase shift',maxNLph);
 OSNRController=Canvas.GetComponentByName('Set OSNR');
 OSNRController.SetParameterValue('Signal Frequency',ch2Hz(AnCh));
 
-BG=Canvas.GetComponentByName('Ideal Dispersion Compensation FBG');
-BG.SetParameterValue('Frequency',ch2Hz(AnCh));
-BG.SetParameterValue('Bandwidth',100*(N+2));
-
-OptFilt=Canvas.GetComponentByName('Gaussian Optical Filter');
-OptFilt.SetParameterValue('Frequency',ch2Hz(AnCh));
-
-OutputOptAmp=Canvas.GetComponentByName('Optical Amplifier');
-OutputOptAmp.SetParameterValue('Operation mode','Power control');
-OutputOptAmp.SetParameterValue('Power',OuputPower);
+nFork=Canvas.GetComponentByName('');
+% BG=Canvas.GetComponentByName('Ideal Dispersion Compensation FBG');
+% BG.SetParameterValue('Frequency',ch2Hz(AnCh));
+% BG.SetParameterValue('Bandwidth',100*(N+2));
+% 
+% OptFilt=Canvas.GetComponentByName('Gaussian Optical Filter');
+% OptFilt.SetParameterValue('Frequency',ch2Hz(AnCh));
+% 
+% OutputOptAmp=Canvas.GetComponentByName('Optical Amplifier');
+% OutputOptAmp.SetParameterValue('Operation mode','Power control');
+% OutputOptAmp.SetParameterValue('Power',OuputPower);
 
 %creating and customizing BERAnalyzer
-EyeName='BER Analyzer';
-VisLib='{F11D0C25-3C7D-11D4-93F0-0050DAB7C5D6}';
-LPFiltName='Low Pass Bessel Filter';
-
-BEROsc=Canvas.CreateComponent(EyeName,VisLib,xEye,yEye, compW, compH,1);
-LPF=Canvas.GetComponentByName(LPFiltName);
-
-PRBSs(NCh).GetOutputPort(1).ConnectVisualizer(BEROsc.GetInputPort(1));
-NRZGens(NCh).GetOutputPort(1).ConnectVisualizer(BEROsc.GetInputPort(2));
-LPF.GetOutputPort(1).ConnectVisualizer(BEROsc.GetInputPort(3));
+% EyeName='BER Analyzer';
+% VisLib='{F11D0C25-3C7D-11D4-93F0-0050DAB7C5D6}';
+% LPFiltName='Low Pass Bessel Filter';
+% 
+% BEROsc=Canvas.CreateComponent(EyeName,VisLib,xEye,yEye, compW, compH,1);
+% LPF=Canvas.GetComponentByName(LPFiltName);
+% 
+% PRBSs(NCh).GetOutputPort(1).ConnectVisualizer(BEROsc.GetInputPort(1));
+% NRZGens(NCh).GetOutputPort(1).ConnectVisualizer(BEROsc.GetInputPort(2));
+% LPF.GetOutputPort(1).ConnectVisualizer(BEROsc.GetInputPort(3));
 
 Canvas.UpdateAll;%draw all created components and connections
 nameOfOptsyss=string(1:Npars);

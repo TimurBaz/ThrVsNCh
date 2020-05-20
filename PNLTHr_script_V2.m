@@ -4,7 +4,7 @@ clearvars;
 close all;
 tStart=tic;
 
-load('optsLibs.mat');
+load('optLibs.mat');
 %Open start file, where the scheme will be drawn
 directory = strcat(pwd,'\PNLThr.osd');
 optsys=OpenOptisystem(directory);
@@ -56,7 +56,7 @@ Pin=[0,1];%array with param of channels power after input amplifier
 compW=34;%width of a Component
 compH=34;%heigth of a Component
 xL0=10;%start coodinate of first column of dynamic Components
-yL0=30;%start coodinate of first row of dynamic Components
+yL0=60;%start coodinate of first row of dynamic Components
 dx=100;%horizontal distance between dynamic Components
 dy=200;%vertical distance between dynamic Components
 xEye=1000;%x coordinate of BER analyzer
@@ -117,7 +117,8 @@ optFiber.SetParameterValue('Max. nonlinear phase shift',maxNLph);
 OSNRController=Canvas.GetComponentByName('Set OSNR');
 OSNRController.SetParameterValue('Signal Frequency',ch2Hz(AnCh));
 
-NFork=CanvasGetComponentByName('Fork 1xN');
+NFork=Canvas.GetComponentByName('Fork 1xN');
+NFork.SetParameterValue('Number of output ports',N);
 
 bgName='Ideal Dispersion Compensation FBG';
 optFiltName='Gaussian Optical Filter';
@@ -126,15 +127,15 @@ APDName='APD';
 LPFName='Low Pass Bessel Filter';
 RegName='3R Regenerator';
 EyeName='BER Analyzer';
-numCol=8;
+numCol=10;
 for k=1:N
-    BG(k)=Canvas.CreateComponent(bgName,FiltLib,xL0+numCol*dx,yL0+dy*(k-1), compW, compH,1);
+    BG(k)=Canvas.CreateComponent(bgName,DispCompLib,xL0+numCol*dx,yL0+dy*(k-1), compW, compH,1);
     OptFilt(k)=Canvas.CreateComponent(optFiltName,FiltLib,xL0+(numCol+1)*dx,yL0+dy*(k-1), compW, compH,1);
     OptAmp(k)=Canvas.CreateComponent(optAmpName,AmpLib,xL0+(numCol+2)*dx,yL0+dy*(k-1), compW, compH,1);
     APD(k)=Canvas.CreateComponent(APDName,RecLib,xL0+(numCol+3)*dx,yL0+dy*(k-1), compW, compH,1);
     LPF(k)=Canvas.CreateComponent(LPFName,FiltLib,xL0+(numCol+4)*dx,yL0+dy*(k-1), compW, compH,1);
     Reg(k)=Canvas.CreateComponent(RegName,RecLib,xL0+(numCol+5)*dx,yL0+dy*(k-1), compW, compH,1);
-    EyeOsc(k)=Canvas.CreateComponent(EyeName,VisLib,xL0+(numCol+6)*dx,yL0+dy*(k-1), compW, compH,1);
+    EyeOsc(k)=Canvas.CreateComponent(EyeName,VisLib,xL0+(numCol+7)*dx,yL0+dy*(k-1), compW, compH,1);
     
     %customizing recievers
     BG(k).SetParameterValue('Frequency',ch2Hz(AnCh));
@@ -154,9 +155,9 @@ for k=1:N
     OptFilt(k).GetOutputPort(1).Connect(OptAmp(k).GetInputPort(1));
     OptAmp(k).GetOutputPort(1).Connect(APD(k).GetInputPort(1));
     APD(k).GetOutputPort(1).Connect(Reg(k).GetInputPort(1));
-    Reg(k).GetOutputPort(1).Connect(EyeOsc(k).GetInputPort(1));
-    Reg(k).GetOutputPort(2).Connect(EyeOsc(k).GetInputPort(2));
-    Reg(k).GetOutputPort(3).Connect(EyeOsc(k).GetInputPort(3));
+    Reg(k).GetOutputPort(1).ConnectVisualizer(EyeOsc(k).GetInputPort(1));
+    Reg(k).GetOutputPort(2).ConnectVisualizer(EyeOsc(k).GetInputPort(2));
+    Reg(k).GetOutputPort(3).ConnectVisualizer(EyeOsc(k).GetInputPort(3));
 end
 
 Canvas.UpdateAll;%draw all created components and connections
