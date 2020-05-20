@@ -113,7 +113,7 @@ end
 InAmp=Canvas.GetComponentByName('Optical Amplifier');
 InAmp.GetInputPort(1).Connect(Mux.GetOutputPort(1));
 
-optFiber=Canvas.GetComponentByName('Optical Fiber');
+optFiber=Canvas.GetComponentByName('Optical Fiber CWDM');
 optFiber.SetParameterValue('Max. nonlinear phase shift',maxNLph);
 
 OSNRController=Canvas.GetComponentByName('Set OSNR');
