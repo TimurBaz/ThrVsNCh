@@ -8,7 +8,6 @@ load('optLibs.mat');
 %Open start file, where the scheme will be drawn
 directory = strcat(pwd,'\PNLThr_start_for_save.osd');
 optsys=OpenOptisystem(directory);
-Npars=1;%always 1, because parallel calculations weren't implemented
 
 %Get main system variables
 Document = optsys.GetActiveDocument;
@@ -32,19 +31,7 @@ OutputOfOneLaser=0;
 
 Chirp0=-0.65;%alpha parameter of input chirp
 m0=0.85;%modulation index of input radiation
-OuputPower=-10;%total optical power after output amplifier
 
-APDGain=10;
-APDResp=0.85;
-APDIon=0.9;
-NF=0;
-FiltBand=50;
-
-Disps=-3000:100:2000;%array with investigating dispersion points
-NDisps=length(Disps);
-NDisp=length(Disps);%number of dispersion points
-BERreq=10^-10;%value of req BER
-dDispThr=200;%threshold for dispersion curve variations
 
 Pin=[0:1];%array with param of channels power after input amplifier
     if (mod(length(Pin),Npars)==0) 
