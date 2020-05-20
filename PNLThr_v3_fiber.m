@@ -32,14 +32,7 @@ OutputOfOneLaser=0;
 Chirp0=-0.65;%alpha parameter of input chirp
 m0=0.85;%modulation index of input radiation
 
-
 Pin=[0:1];%array with param of channels power after input amplifier
-    if (mod(length(Pin),Npars)==0) 
-        Pin=reshape(Pin,Npars,length(Pin)/Npars);
-    else
-        error='size of Pin is not agreed with Npars';
-        return;
-    end
  
 %drawing settings
 compW=34;%width of a Component
