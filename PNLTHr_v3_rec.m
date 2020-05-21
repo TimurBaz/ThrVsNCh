@@ -4,21 +4,12 @@ clearvars;
 close all;
 tStart=tic;
 
-% load('optLibs.mat');
-% %Open start file, where the scheme will be drawn
-% directory = strcat(pwd,'\PNLThr_start_for_load.osd');
-% optsys=OpenOptisystem(directory);
+load('optLibs.mat');
+%Open start file, where the scheme will be drawn
+directory = strcat(pwd,'\PNLThr_start_for_load.osd');
+optsys=OpenOptisystem(directory);
 
-% StartFileName='05-21-2020_11_32_35_N_of_Chs=3_Pin=11.ods';
-% a2=regexp(StartFileName,'_Pin')-1;
-% a1=regexp(StartFileName,'Chs=')+4;
-% b2=regexp(StartFileName,'.ods')-1;
-% b1=regexp(StartFileName,'_Pin=')+5;
-% N=str2num(StartFileName(a1:a2));
-% temp=StartFileName(b1:b2);
-% startDate=StartFileName(1:19);
-
-StartFileName='05-21-2020_11_32_35_N_of_Chs=3_Pin=11.ods';
+StartFileName='05-21-2020_16_33_56_N_of_Chs=3_Pin=0.ods';
 [startDate,N,PinCur]=parseNameOfFile(StartFileName);
 
 Files=dir;
@@ -36,6 +27,10 @@ end
 for k=1:NPin
     [~,~,Pin(k)]=parseNameOfFile(FilesForCalc(k));
 end
+
+[Pin,Pin_order]=sort(Pin);
+FilesForCalc=FilesForCalc(Pin_order);
+
 %Get main system variables
 Document = optsys.GetActiveDocument;
 LayoutMgr = Document.GetLayoutMgr;
@@ -47,6 +42,7 @@ PmMgr = Layout.GetParameterMgr;
 FiberDisp=1800;%dispersion of fiber 18[ps/nm/km]*100[km]
 maxNLph=12.5;%max NL phase per step [mrad]
 
+halfN=(N-1)/2;
 ch0=30;%start channel
 dCh=1;%distance between consecutive channels
 Chs=30:dCh:ch0+dCh*(N-1);%array of investigated channels
@@ -93,7 +89,7 @@ LPFName='Low Pass Bessel Filter';
 RegName='3R Regenerator';
 EyeName='BER Analyzer';
 numCol=10;
-ArrEyeNames=strings([1,NDsips]);
+ArrEyeNames=strings([1,NDisps]);
 
 %draw receivers
 for k=1:NDisps
@@ -131,7 +127,7 @@ for k=1:NDisps
     Reg(k).GetOutputPort(3).ConnectVisualizer(EyeOsc(k).GetInputPort(3));
     
     %save name for calc
-    ArrEyeNames(k)=string(EyeOsc.Name);
+    ArrEyeNames(k)=string(EyeOsc(k).Name);
 end
 
 Canvas.UpdateAll;%draw all created components and connections
