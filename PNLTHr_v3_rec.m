@@ -159,7 +159,7 @@ for q=1:NPin
     end
     OSNRController=Canvas.GetComponentByName('Set OSNR');
     
-    LoadFromFile.SetParameterValue('Filename',Files(q));
+    LoadFromFile.SetParameterValue('Filename',FilesForCalc(q));
     for m=1:NOSNRs
         OSNRController.SetParameterValue('Set OSNR',OSNRs(m));
         Document.CalculateProject( true , true);
