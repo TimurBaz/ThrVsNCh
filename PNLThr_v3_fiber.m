@@ -114,6 +114,12 @@ clear optsys;
 for k=1:NPin
     disp(Pin(k));
     optsys=OpenOptisystem(strcat(pwd,'\PNLThr_ForCalc_Fiber.osd'));
+    Document = optsys.GetActiveDocument;
+    LayoutMgr = Document.GetLayoutMgr;
+    Layout = LayoutMgr.GetCurrentLayout;
+    Canvas = Layout.GetCurrentCanvas;
+    InAmp=Canvas.GetComponentByName('Optical Amplifier');
+    SaveFileComp=Canvas.GetComponentByName('Save to file');
     
     totalPower=Pin(k)+10*log10(N);
     fileNamek=[timeForFile,sprintf('_N_of_Chs=%d_Pin=%d.ods',N,Pin(k))];
