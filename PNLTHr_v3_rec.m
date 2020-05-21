@@ -8,10 +8,8 @@ load('optLibs.mat');
 %Open start file, where the scheme will be drawn
 directory = strcat(pwd,'\PNLThr_start_for_load.osd');
 optsys=OpenOptisystem(directory);
-Npars=1;%always 1, because parallel calculations weren't implemented
 
-
-fileName='05-20-2020_20_25_53_N_of_Chs=3_Pin=1-10.ods';
+fileName='05-20-2020_21_08_04_N_of_Chs=3_Pin=0-1.ods';
 a2=regexp(fileName,'_Pin')-1;
 a1=regexp(fileName,'Chs=')+4;
 b2=regexp(fileName,'.ods')-1;
