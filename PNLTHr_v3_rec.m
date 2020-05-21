@@ -158,8 +158,9 @@ for q=1:NPin
         EyeOsc(k)=Canvas.GetComponentByName(char(ArrEyeNames(k)));
     end
     OSNRController=Canvas.GetComponentByName('Set OSNR');
+    LoadFromFile=Canvas.GetComponentByName('Load from file');
     
-    LoadFromFile.SetParameterValue('Filename',FilesForCalc(q));
+    LoadFromFile.SetParameterValue('Filename',char(FilesForCalc(q)));
     for m=1:NOSNRs
         OSNRController.SetParameterValue('Set OSNR',OSNRs(m));
         Document.CalculateProject( true , true);
