@@ -98,25 +98,36 @@ optFiber=Canvas.GetComponentByName('Optical Fiber CWDM');
 optFiber.SetParameterValue('Max. nonlinear phase shift',maxNLph);
 
 SaveFileComp=Canvas.GetComponentByName('Save to file');
-SaveFileComp.SetParameterValue('Filename',2);%Set iterated mode
+SaveFileComp.SetParameterValue('Filename',0);%Set normal mode
 
 NPin=length(Pin);
-Layout.SetTotalSweepIterations(NPin);
-InAmp.SetParameterMode('Power',2);%Set iterated mode
+Layout.SetTotalSweepIterations(1);
+InAmp.SetParameterMode('Power',0);%Set normal mode
 timeForFile=datestr(now,'mm-dd-yyyy_HH_MM_SS');
 
-for k=1:NPin
-    totalPower=Pin(k)+10*log10(N);
-    fileNamek=[timeForFile,sprintf('_N_of_Chs=%d_Pin=%d.ods',N,Pin(k))];
-    InAmp.SetSweepParameterValue('Power',k,totalPower);
-    SaveFileComp.SetSweepParameterValue('Filename',k,fileNamek);
-end
-
-Document.Save(strcat(pwd,'\PNLThr_ForCalc_Fiber.osd'));
 Canvas.UpdateAll;%draw all created components and connections
 optsys.ActivateApplication();
-
-Document.CalculateProject(true,true);
-optsys.Quit;
+Document.Save(strcat(pwd,'\PNLThr_ForCalc_Fiber.osd'));
+optsys.Quit();
 clear optsys;
+
+for k=1:NPin
+    disp(Pin(k));
+    optsys=OpenOptisystem(strcat(pwd,'\PNLThr_ForCalc_Fiber.osd'));
+    
+    totalPower=Pin(k)+10*log10(N);
+    fileNamek=[timeForFile,sprintf('_N_of_Chs=%d_Pin=%d.ods',N,Pin(k))];
+    
+    InAmp.SetParameterValue('Power',totalPower);
+    SaveFileComp.SetParameterValue('Filename',fileNamek);
+    Document.CalculateProject(true,true);
+    
+    optsys.Quit();
+    clear optsys
+end
+
+
+
+
+
 timeOfCals=toc(tStart);% time of calculations
