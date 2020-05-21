@@ -155,7 +155,7 @@ for q=1:NPin
     PmMgr = Layout.GetParameterMgr;
     
     for temp=1:NDisps
-        EyeOsc(k)=Canvas.GetComponentByName(char(ArrEyeNames(k)));
+        EyeOsc(temp)=Canvas.GetComponentByName(char(ArrEyeNames(temp)));
     end
     OSNRController=Canvas.GetComponentByName('Set OSNR');
     LoadFromFile=Canvas.GetComponentByName('Load from file');
