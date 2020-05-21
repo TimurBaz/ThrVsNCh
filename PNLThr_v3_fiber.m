@@ -18,7 +18,7 @@ PmMgr = Layout.GetParameterMgr;
 
 %physical settings
 FiberDisp=1800;%dispersion of fiber 18[ps/nm/km]*100[km]
-maxNLph=12.5;%max NL phase per step [mrad]
+maxNLph=1;%max NL phase per step [mrad]
 
 halfN=1;%number of channel on one side of the center
 N=halfN*2+1;%total number of channels
@@ -32,7 +32,7 @@ OutputOfOneLaser=0;
 Chirp0=-0.65;%alpha parameter of input chirp
 m0=0.85;%modulation index of input radiation
 
-Pin=[0:1];%array with param of channels power after input amplifier
+Pin=[0:10];%array with param of channels power after input amplifier
  
 %drawing settings
 compW=34;%width of a Component
@@ -116,3 +116,4 @@ SaveFileComp.SetParameterValue('Filename',fileName);
 Document.CalculateProject(true,true);
 optsys.Quit;
 clear optsys;
+timeOfCals=toc(tStart);% time of calculations
