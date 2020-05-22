@@ -165,7 +165,7 @@ for q=1:NPin
         OSNRController.SetParameterValue('Set OSNR',OSNRs(m));
         Document.CalculateProject( true , true);
         for k=1:NDisps
-            data_BER(q+1,k,m)=EyeOsc(k).GetResultValue('Min. log of BER');
+            data_BER(q,k,m)=EyeOsc(k).GetResultValue('Min. log of BER');
         end
     end
     save('backup');
