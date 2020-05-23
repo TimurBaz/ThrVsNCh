@@ -9,7 +9,7 @@ load('optLibs.mat');
 directory = strcat(pwd,'\PNLThr_start_for_load.osd');
 optsys=OpenOptisystem(directory);
 
-StartFileName='05-21-2020_16_33_56_N_of_Chs=3_Pin=0.ods';
+StartFileName='05-22-2020_11_22_35_N_of_Chs=5_Pin=0.ods';
 [startDate,N,PinCur]=parseNameOfFile(StartFileName);
 
 Files=dir;
@@ -40,7 +40,7 @@ PmMgr = Layout.GetParameterMgr;
 
 %physical settings
 FiberDisp=1800;%dispersion of fiber 18[ps/nm/km]*100[km]
-maxNLph=12.5;%max NL phase per step [mrad]
+maxNLph=1;%max NL phase per step [mrad]
 
 halfN=(N-1)/2;
 ch0=30;%start channel
