@@ -9,7 +9,7 @@ load('optLibs.mat');
 directory = strcat(pwd,'\PNLThr_start_for_load.osd');
 optsys=OpenOptisystem(directory);
 
-StartFileName='05-22-2020_11_22_35_N_of_Chs=5_Pin=0.ods';
+StartFileName='05-25-2020_08_57_57_N_of_Chs=1_Pin=0.ods';
 [startDate,N,PinCur]=parseNameOfFile(StartFileName);
 
 Files=dir;

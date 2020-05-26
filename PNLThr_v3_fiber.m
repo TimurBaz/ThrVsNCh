@@ -20,7 +20,7 @@ PmMgr = Layout.GetParameterMgr;
 FiberDisp=1800;%dispersion of fiber 18[ps/nm/km]*100[km]
 maxNLph=1;%max NL phase per step [mrad]
 
-halfN=2;%number of channel on one side of the center
+halfN=0;%number of channel on one side of the center
 N=halfN*2+1;%total number of channels
 ch0=30;%start channel
 dCh=1;%distance between consecutive channels
