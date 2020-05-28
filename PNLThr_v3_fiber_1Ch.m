@@ -22,7 +22,7 @@ maxNLph=1;%max NL phase per step [mrad]
 
 halfN=0;%number of channel on one side of the center
 N=halfN*2+1;%total number of channels
-ch0=30;%start channel
+ch0=20;%start channel
 dCh=1;%distance between consecutive channels
 Chs=30:dCh:ch0+dCh*(N-1);%array of investigated channels
 NCh=halfN+1;%index of channel under investigation
@@ -31,8 +31,10 @@ OutputOfOneLaser=0;
 
 Chirp0=-0.65;%alpha parameter of input chirp
 m0=0.85;%modulation index of input radiation
+riseTime=0.2;% rise time in bit
+fallTime=0.2;
 
-Pin=[0:10];%array with param of channels power after input amplifier
+Pin=[10:15];%array with param of channels power after input amplifier
  
 %drawing settings
 compW=34;%width of a Component
@@ -72,6 +74,10 @@ for k=1:N
     PRBSs(k) = Canvas.CreateComponent(PRBSName,TransLib,xL0+dx,yL0+dy*(k-1), compW, compH,1);
     NRZGens(k) = Canvas.CreateComponent(NRZGenName,TransLib,xL0+dx*2,yL0+dy*(k-1), compW, compH,1);
     Mods(k) = Canvas.CreateComponent(ModName,TransLib,xL0+dx*2,yL0+dy*(k-0.5), compW, compH,1);
+    
+    %customizing NRZ Pulse Generator
+    NRZGens(k).SetParameterValue('Rise time',riseTime);
+    NRZGens(k).SetParameterValue('Fall time',fallTime);
     
     %customizing modulator
     Mods(k).SetParameterMode('Modulation index',3);
