@@ -43,9 +43,9 @@ FiberDisp=1800;%dispersion of fiber 18[ps/nm/km]*100[km]
 maxNLph=1;%max NL phase per step [mrad]
 
 halfN=(N-1)/2;
-ch0=30;%start channel
+ch0=20;%start channel
 dCh=1;%distance between consecutive channels
-Chs=30:dCh:ch0+dCh*(N-1);%array of investigated channels
+Chs=ch0:dCh:ch0+dCh*(N-1);%array of investigated channels
 NCh=halfN+1;%index of channel under investigation
 AnCh=Chs(NCh);%number of channel under investigation
 OutputOfOneLaser=0;
